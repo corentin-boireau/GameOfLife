@@ -47,6 +47,7 @@ std::ostream& operator<<(std::ostream& os, sf::Vector2<T> vec)
 
 void adjustTransform(sf::CircleShape& circle, const struct Camera &camera, const struct WindowInfos &winInfos);
 void handleKeyboardState(Camera& camera, float timeElapsed);
+sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow, sf::Vector2f windowSize, const Camera& camera);
 
 void testSFML()
 {
@@ -83,8 +84,6 @@ void testSFML()
                 }
                 case sf::Event::MouseWheelScrolled :
                 {
-                    GOL_LOG("scroll pos : " << sf::Vector2f(event.mouseWheelScroll.x, event.mouseWheelScroll.y));
-
                     float previousZoom = camera.zoom;
                     float zoomFactor = pow(1.f + ZOOM_FACTOR_PER_SCROLL_TICK, event.mouseWheelScroll.delta);
                     camera.zoom *= zoomFactor;
@@ -100,17 +99,28 @@ void testSFML()
                         zoomFactor = camera.zoom / previousZoom;
                     }
 
-                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y));
+                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(window.getSize().x),
+                                                                 static_cast<float>(window.getSize().y));
                     const sf::Vector2f distanceFromCenter = sf::Vector2f(curWinSize.x * 0.5f - event.mouseWheelScroll.x,
                                                                          curWinSize.y * 0.5f - event.mouseWheelScroll.y);
                     const sf::Vector2f moveAmout = (distanceFromCenter - camera.position) * (1.f - zoomFactor);
                     
                     camera.position += moveAmout;
 
-                    GOL_LOG("distanceFromCenter : " << distanceFromCenter);
-                    GOL_LOG("moveAmout : "          << moveAmout);
                     GOL_LOG("current zoom : "       << camera.zoom);
                     GOL_LOG("camera position : "    << camera.position << std::endl);
+                    break;
+                }
+                case sf::Event::MouseButtonPressed :
+                {
+                    const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseButton.x),
+                                                                    static_cast<float>(event.mouseButton.y));
+                    GOL_LOG("point on window : " << pointOnWindow);
+
+                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(window.getSize().x),
+                                                                 static_cast<float>(window.getSize().y));
+                    const sf::Vector2f pointInCoordSystem = computePointCoordinates(pointOnWindow, curWinSize, camera);
+                    GOL_LOG("point in coordinate system : " << pointInCoordSystem);
                     break;
                 }
                 case sf::Event::Resized :
@@ -148,7 +158,7 @@ void adjustTransform(sf::CircleShape &circle, const Camera &camera, const Window
 
 void handleKeyboardState(Camera& camera, float timeElapsedSeconds)
 {
-    float moveAmount = MOVE_AMOUNT_PER_SEC * timeElapsedSeconds;// / camera.zoom;
+    float moveAmount = MOVE_AMOUNT_PER_SEC * timeElapsedSeconds;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
         camera.position.y -= moveAmount; 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
@@ -157,4 +167,10 @@ void handleKeyboardState(Camera& camera, float timeElapsedSeconds)
         camera.position.y += moveAmount;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         camera.position.x += moveAmount;
+}
+
+sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow, sf::Vector2f windowSize, const Camera &camera)
+{
+    const sf::Vector2f distanceFromWindowCenter = windowSize * 0.5f - pointOnWindow;
+    return - (distanceFromWindowCenter - camera.position) / camera.zoom;
 }
