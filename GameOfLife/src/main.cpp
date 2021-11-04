@@ -1,17 +1,18 @@
 ﻿#include <iostream>
 #include <chrono>
-
+#include <cmath>
 #include <SFML/Graphics.hpp>
 
 #define TITLE "Game of Life"
 
 #define ZOOM_MIN 0.01f
 #define ZOOM_MAX 100.f
+#define ZOOM_FACTOR_PER_SCROLL_TICK 0.25f
 
-#define MOVE_AMOUNT_PER_SEC 100.f
+#define MOVE_AMOUNT_PER_SEC 500.f
 
 #ifdef GOL_DEBUG
-    #define GOL_LOG(X) std::cout << X
+    #define GOL_LOG(X) std::cout << X << std::endl 
 #else
     #define GOL_LOG(X)
 #endif // GOL_DEBUG
@@ -82,14 +83,34 @@ void testSFML()
                 }
                 case sf::Event::MouseWheelScrolled :
                 {
-                    camera.zoom *= 1.0f + event.mouseWheelScroll.delta * 0.25f;
+                    GOL_LOG("scroll pos : " << sf::Vector2f(event.mouseWheelScroll.x, event.mouseWheelScroll.y));
+
+                    float previousZoom = camera.zoom;
+                    float zoomFactor = pow(1.f + ZOOM_FACTOR_PER_SCROLL_TICK, event.mouseWheelScroll.delta);
+                    camera.zoom *= zoomFactor;
 
                     if (camera.zoom < ZOOM_MIN)
+                    {
                         camera.zoom = ZOOM_MIN;
+                        zoomFactor = camera.zoom / previousZoom;
+                    }
                     else if (camera.zoom > ZOOM_MAX)
+                    {
                         camera.zoom = ZOOM_MAX;
+                        zoomFactor = camera.zoom / previousZoom;
+                    }
 
-                    GOL_LOG("current zoom : " << camera.zoom << std::endl);
+                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(window.getSize().y));
+                    const sf::Vector2f distanceFromCenter = sf::Vector2f(curWinSize.x * 0.5f - event.mouseWheelScroll.x,
+                                                                         curWinSize.y * 0.5f - event.mouseWheelScroll.y);
+                    const sf::Vector2f moveAmout = (distanceFromCenter - camera.position) * (1.f - zoomFactor);
+                    
+                    camera.position += moveAmout;
+
+                    GOL_LOG("distanceFromCenter : " << distanceFromCenter);
+                    GOL_LOG("moveAmout : "          << moveAmout);
+                    GOL_LOG("current zoom : "       << camera.zoom);
+                    GOL_LOG("camera position : "    << camera.position << std::endl);
                     break;
                 }
                 case sf::Event::Resized :
@@ -119,13 +140,15 @@ void adjustTransform(sf::CircleShape &circle, const Camera &camera, const Window
     circle.setScale(newScale);
 
     sf::Vector2f newPostion = winInfos.size * 0.5f - newScale * circle.getRadius(); // put shape on the center of the screen
-    newPostion -= camera.position;  // take camera position into account 
+    // take camera position into account 
+    newPostion.x -= camera.position.x * winInfos.scale.x;
+    newPostion.y -= camera.position.y * winInfos.scale.y;
     circle.setPosition(newPostion);
 }
 
-void handleKeyboardState(Camera& camera, float timeElapsed)
+void handleKeyboardState(Camera& camera, float timeElapsedSeconds)
 {
-    float moveAmount = MOVE_AMOUNT_PER_SEC * timeElapsed;
+    float moveAmount = MOVE_AMOUNT_PER_SEC * timeElapsedSeconds;// / camera.zoom;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
         camera.position.y -= moveAmount; 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
@@ -134,6 +157,4 @@ void handleKeyboardState(Camera& camera, float timeElapsed)
         camera.position.y += moveAmount;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         camera.position.x += moveAmount;
-
-    GOL_LOG("camera position : " << camera.position << std::endl);
 }
