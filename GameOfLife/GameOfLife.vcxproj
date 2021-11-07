@@ -14,7 +14,12 @@
     <CudaCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Base.h" />
+    <ClInclude Include="src\GameOfLife\Base.h" />
+    <ClInclude Include="src\GameOfLife\Controller.h" />
+    <ClInclude Include="src\GameOfLife\Macros.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\GameOfLife\Controller.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E782A29F-D54F-46DC-956E-A5891FDD0CE7}</ProjectGuid>
