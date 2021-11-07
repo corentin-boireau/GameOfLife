@@ -11,7 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\main.cpp" />
+    <CudaCompile Include="src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Base.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E782A29F-D54F-46DC-956E-A5891FDD0CE7}</ProjectGuid>

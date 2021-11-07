@@ -3,6 +3,8 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
+#include "Base.h"
+
 #define TITLE "Game of Life"
 
 #define ZOOM_MIN 0.01f
@@ -34,8 +36,8 @@ struct WindowInfos
 
 struct Camera
 {
-    float        zoom;
     sf::Vector2f position;
+    float        zoom;
 };
 
 template<typename T>
@@ -45,7 +47,7 @@ std::ostream& operator<<(std::ostream& os, sf::Vector2<T> vec)
     return os;
 }
 
-void adjustTransform(sf::CircleShape& circle, const struct Camera &camera, const struct WindowInfos &winInfos);
+void adjustTransform(sf::Shape& shape, const struct Camera &camera, const struct WindowInfos &winInfos);
 void handleKeyboardState(Camera& camera, float timeElapsed);
 sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow, sf::Vector2f windowSize, const Camera& camera);
 
@@ -59,12 +61,13 @@ void testSFML()
     };
 
     Camera camera = {
-        1.f,
-        sf::Vector2f(0.f, 0.f)
+        sf::Vector2f(0.f, 0.f),
+        1.f
     };
 
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    //sf::Shape& shape = sf::CircleShape(100.f); 
+    sf::Shape& shape = sf::RectangleShape(sf::Vector2f(100.f, 100.f));
+    shape.setFillColor(sf::Color::Blue);
 
     sf::Clock clock;
     
@@ -143,17 +146,19 @@ void testSFML()
     }
 }
 
-void adjustTransform(sf::CircleShape &circle, const Camera &camera, const WindowInfos &winInfos)
+void adjustTransform(sf::Shape &shape, const Camera &camera, const WindowInfos &winInfos)
 {
     sf::Vector2f newScale = sf::Vector2f(camera.zoom * winInfos.scale.x,
                                          camera.zoom * winInfos.scale.y);
-    circle.setScale(newScale);
+    shape.setScale(newScale);
 
-    sf::Vector2f newPostion = winInfos.size * 0.5f - newScale * circle.getRadius(); // put shape on the center of the screen
+    sf::Vector2f scaledBounds = sf::Vector2f(newScale.x * shape.getLocalBounds().width,
+                                             newScale.y * shape.getLocalBounds().height);
+    sf::Vector2f newPostion = (winInfos.size - scaledBounds) * 0.5f; // put shape on the center of the screen
     // take camera position into account 
     newPostion.x -= camera.position.x * winInfos.scale.x;
     newPostion.y -= camera.position.y * winInfos.scale.y;
-    circle.setPosition(newPostion);
+    shape.setPosition(newPostion);
 }
 
 void handleKeyboardState(Camera& camera, float timeElapsedSeconds)
