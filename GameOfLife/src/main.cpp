@@ -52,11 +52,13 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1000, 480), TITLE);
 
     sf::Shape& shape = sf::RectangleShape(sf::Vector2f(100.f, 100.f));
-    shape.setFillColor(sf::Color::Blue);
+    shape.setFillColor(sf::Color::Red);
 
     DummyEngine engine = DummyEngine();
     DummyView view = DummyView(engine, shape);
     GameOfLife::Controller<10> controller = GameOfLife::Controller<10>(engine, view, window, MOVE_AMOUNT_PER_SEC, ZOOM_FACTOR_PER_SCROLL_TICK);
+    
+    controller.mainLoop();
 
     return 0;
 }
