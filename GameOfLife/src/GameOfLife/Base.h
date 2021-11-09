@@ -9,26 +9,34 @@ namespace GameOfLife
 	class AbstractEngine
 	{
 	public:
-		using data_t = std::array<bool, sideLength* sideLength>;
+		using data_t = std::array<sf::Uint8, sideLength* sideLength * 4>;
 
-		AbstractEngine()
-		{}
+		AbstractEngine() {}
 
-		virtual void step() = 0;
-		virtual bool getCellState(size_t x, size_t y) const = 0;
-		virtual void setCellState(size_t x, size_t y, bool isAlive) = 0;
-		virtual const data_t& getData() const = 0;
+		virtual ~AbstractEngine() {}
+
+		inline bool getCellState(size_t x, size_t y) const { return m_data[x * sideLength + y]; };
+		inline void setCellState(size_t x, size_t y, bool isAlive) { m_data[x * sideLength + y] = isAlive; };
+		inline const data_t& getData() const { return m_data; };
+		
+		virtual void computeNextGeneration() = 0;
+
+	private:
+		data_t m_data;
 	};
 
 	template<size_t sideLength>
 	class AbstractView
 	{
 	public:
-		using data_t = std::array<bool, sideLength* sideLength>;
+		using data_t = std::array<sf::Uint8, sideLength* sideLength * 4>;
 		using EngineType = AbstractEngine<sideLength>;
 
 		AbstractView(EngineType& engine)
 			: m_engine(engine) {}
+
+		virtual ~AbstractView() {}
+
 		virtual sf::Shape& render() = 0;
 	protected:
 		inline const data_t& getEngineData() const

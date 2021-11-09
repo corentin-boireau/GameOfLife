@@ -1,8 +1,23 @@
 #pragma once
 
+#include <iostream>
+
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Window/Event.hpp>
 
 #include "Base.h"
+#include "Macros.h"
+
+#define ZOOM_MIN 0.01f
+#define ZOOM_MAX 100.f
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, sf::Vector2<T> vec)
+{
+    os << "(" << vec.x << ", " << vec.y << ")";
+    return os;
+}
+
 
 namespace GameOfLife
 {
@@ -55,31 +70,7 @@ namespace GameOfLife
 		void         handleKeyboardState(float timeElapsed);
 		sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow);
 	};
-}
 
-// Controller.cpp content
-// TODO : Move it to the source file when I know more about templates
-#include "Controller.h"
-
-#include <iostream>
-#include <SFML/Window/Event.hpp>
-
-#include "Base.h"
-#include "Macros.h"
-
-#define ZOOM_MIN 0.01f
-#define ZOOM_MAX 100.f
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, sf::Vector2<T> vec)
-{
-    os << "(" << vec.x << ", " << vec.y << ")";
-    return os;
-}
-
-
-namespace GameOfLife
-{
     template<size_t sideLength>
     void Controller<sideLength>::mainLoop()
     {
