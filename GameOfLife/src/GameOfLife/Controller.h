@@ -1,9 +1,12 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include "Base.h"
 #include "Macros.h"
@@ -71,6 +74,8 @@ namespace GameOfLife
 		sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow);
 	};
 
+    constexpr const char* FONT_NAME = "assets/arial.ttf";
+
     template<size_t sideLength>
     void Controller<sideLength>::mainLoop()
     {
@@ -78,67 +83,79 @@ namespace GameOfLife
 
         sf::Clock clock;
 
+        sf::Font font;
+        if (!font.loadFromFile(FONT_NAME))
+        {
+            // SFML already logs the error
+            exit(EXIT_FAILURE);
+        }
+
+        sf::Text fpsText;
+        fpsText.setFont(font);
+        fpsText.setCharacterSize(16);
+        fpsText.setFillColor(sf::Color::Yellow);
+
         while (m_window.isOpen())
         {
             sf::Time timeElapsed = clock.restart();
+            fpsText.setString(std::to_string(static_cast<int>(1.f / timeElapsed.asSeconds())));
 
             sf::Event event;
             while (m_window.pollEvent(event))
             {
                 switch (event.type)
                 {
-                case sf::Event::Closed:
-                {
-                    m_window.close();
-                    break;
-                }
-                case sf::Event::MouseWheelScrolled:
-                {
-                    float previousZoom = m_camera.zoom;
-                    float zoomFactor = pow(1.f + m_camera.zoomFactorPerScrollTick, event.mouseWheelScroll.delta);
-                    m_camera.zoom *= zoomFactor;
-
-                    if (m_camera.zoom < ZOOM_MIN)
+                    case sf::Event::Closed:
                     {
-                        m_camera.zoom = ZOOM_MIN;
-                        zoomFactor = m_camera.zoom / previousZoom;
+                        m_window.close();
+                        break;
                     }
-                    else if (m_camera.zoom > ZOOM_MAX)
+                    case sf::Event::MouseWheelScrolled:
                     {
-                        m_camera.zoom = ZOOM_MAX;
-                        zoomFactor = m_camera.zoom / previousZoom;
+                        float previousZoom = m_camera.zoom;
+                        float zoomFactor = pow(1.f + m_camera.zoomFactorPerScrollTick, event.mouseWheelScroll.delta);
+                        m_camera.zoom *= zoomFactor;
+
+                        if (m_camera.zoom < ZOOM_MIN)
+                        {
+                            m_camera.zoom = ZOOM_MIN;
+                            zoomFactor = m_camera.zoom / previousZoom;
+                        }
+                        else if (m_camera.zoom > ZOOM_MAX)
+                        {
+                            m_camera.zoom = ZOOM_MAX;
+                            zoomFactor = m_camera.zoom / previousZoom;
+                        }
+
+                        const sf::Vector2f curWinSize = static_cast<sf::Vector2f>(m_window.getSize());
+                        const sf::Vector2f distanceFromWindowCenter = sf::Vector2f(curWinSize.x * 0.5f - event.mouseWheelScroll.x,
+                                                                                   curWinSize.y * 0.5f - event.mouseWheelScroll.y);
+                        const sf::Vector2f moveAmout = (distanceFromWindowCenter - m_camera.position) * (1.f - zoomFactor);
+
+                        m_camera.position += moveAmout;
+
+                        GOL_LOG("current zoom : " << m_camera.zoom);
+                        GOL_LOG("camera position : " << m_camera.position << std::endl);
+                        break;
                     }
+                    case sf::Event::MouseButtonPressed:
+                    {
+                        const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseButton.x),
+                                                                        static_cast<float>(event.mouseButton.y));
+                        GOL_LOG("point on window : " << pointOnWindow);
 
-                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(m_window.getSize().x),
-                        static_cast<float>(m_window.getSize().y));
-                    const sf::Vector2f distanceFromWindowCenter = sf::Vector2f(curWinSize.x * 0.5f - event.mouseWheelScroll.x,
-                        curWinSize.y * 0.5f - event.mouseWheelScroll.y);
-                    const sf::Vector2f moveAmout = (distanceFromWindowCenter - m_camera.position) * (1.f - zoomFactor);
-
-                    m_camera.position += moveAmout;
-
-                    GOL_LOG("current zoom : " << m_camera.zoom);
-                    GOL_LOG("camera position : " << m_camera.position << std::endl);
-                    break;
-                }
-                case sf::Event::MouseButtonPressed:
-                {
-                    const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseButton.x),
-                        static_cast<float>(event.mouseButton.y));
-                    GOL_LOG("point on window : " << pointOnWindow);
-
-                    const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(m_window.getSize().x),
-                        static_cast<float>(m_window.getSize().y));
-                    const sf::Vector2f pointInCoordSystem = computePointCoordinates(pointOnWindow);
-                    GOL_LOG("point in coordinate system : " << pointInCoordSystem);
-                    break;
-                }
-                case sf::Event::Resized:
-                {
-                    m_windowInfos.scale.x = m_windowInfos.size.x / static_cast<float>(event.size.width);
-                    m_windowInfos.scale.y = m_windowInfos.size.y / static_cast<float>(event.size.height);
-                    break;
-                }
+                        const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(m_window.getSize().x),
+                                                                     static_cast<float>(m_window.getSize().y));
+                        const sf::Vector2f pointInCoordSystem = computePointCoordinates(pointOnWindow);
+                        GOL_LOG("point in coordinate system : " << pointInCoordSystem);
+                        break;
+                    }
+                    case sf::Event::Resized:
+                    {
+                        m_windowInfos.scale.x = m_windowInfos.size.x / static_cast<float>(event.size.width);
+                        m_windowInfos.scale.y = m_windowInfos.size.y / static_cast<float>(event.size.height);
+                        break;
+                    }
                 }
             }
 
@@ -149,6 +166,7 @@ namespace GameOfLife
 
             m_window.clear();
             m_window.draw(shape);
+            m_window.draw(fpsText);
             m_window.display();
         }
     }

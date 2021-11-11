@@ -45,8 +45,6 @@ namespace GameOfLife
 	template<size_t sideLength>
 	sf::Shape& ClassicView<sideLength>::render()
 	{
-		
-		
 		m_shape.setTexture(&m_texture, true);
 		return m_shape;
 	}
