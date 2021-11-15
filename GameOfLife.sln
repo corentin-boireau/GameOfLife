@@ -5,16 +5,30 @@ VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameOfLife", "GameOfLife\GameOfLife.vcxproj", "{E782A29F-D54F-46DC-956E-A5891FDD0CE7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestsSFML", "TestsSFML\TestsSFML.vcxproj", "{5ED157B7-7197-47FB-A7FD-E5C208E727BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Debug|x64.ActiveCfg = Debug|x64
 		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Debug|x64.Build.0 = Debug|x64
+		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Debug|x86.ActiveCfg = Debug|x64
 		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Release|x64.ActiveCfg = Release|x64
 		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Release|x64.Build.0 = Release|x64
+		{E782A29F-D54F-46DC-956E-A5891FDD0CE7}.Release|x86.ActiveCfg = Release|x64
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Debug|x64.ActiveCfg = Debug|x64
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Debug|x64.Build.0 = Debug|x64
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Debug|x86.ActiveCfg = Debug|Win32
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Debug|x86.Build.0 = Debug|Win32
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Release|x64.ActiveCfg = Release|x64
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Release|x64.Build.0 = Release|x64
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Release|x86.ActiveCfg = Release|Win32
+		{5ED157B7-7197-47FB-A7FD-E5C208E727BC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

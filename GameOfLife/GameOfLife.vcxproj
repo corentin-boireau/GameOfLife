@@ -18,6 +18,7 @@
     <ClInclude Include="src\GameOfLife\CPUEngine.h" />
     <ClInclude Include="src\GameOfLife\Base.h" />
     <ClInclude Include="src\GameOfLife\Controller.h" />
+    <ClInclude Include="src\GameOfLife\HeapArray.h" />
     <ClInclude Include="src\GameOfLife\Macros.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -73,7 +74,7 @@
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;opengl32.lib;winmm.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;freetype-s-d.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files\SFML\lib;C:\Program Files\FreeType\lib;%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>LIBCMT;</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/IGNORE:4099</AdditionalOptions>
     </Link>
     <CudaCompile>

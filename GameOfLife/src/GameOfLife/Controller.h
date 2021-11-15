@@ -1,12 +1,13 @@
 #pragma once
 
 #include <iostream>
-#include <string>
+#include <cassert>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include "Base.h"
 #include "Macros.h"
@@ -56,8 +57,12 @@ namespace GameOfLife
 			       float moveAmountPerSec, float zoomFactorPerScrollTick)
 			: m_engine(engine), m_view(view), m_window(window), 
 			  m_windowInfos(static_cast<sf::Vector2f>(window.getSize()),
-				            sf::Vector2f(1.f, 1.f)),
-			  m_camera(Camera(moveAmountPerSec, zoomFactorPerScrollTick)) {}
+				                        sf::Vector2f(1.f, 1.f)),
+			  m_camera(Camera(moveAmountPerSec, zoomFactorPerScrollTick)) 
+        {
+            bool created = m_texture.create(static_cast<uint32_t>(sideLength), static_cast<uint32_t>(sideLength));
+            assert(created);
+        }
 
 		void mainLoop();
 
@@ -67,9 +72,10 @@ namespace GameOfLife
 		sf::RenderWindow& m_window;
 		Camera            m_camera;
 		WindowInfos       m_windowInfos;
+        sf::Texture       m_texture;
 
 
-		void         adjustTransform(sf::Shape& shape);
+        void         adjustTransform(sf::Transformable& transformable, sf::FloatRect localBounds);
 		void         handleKeyboardState(float timeElapsed);
 		sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow);
 	};
@@ -78,17 +84,16 @@ namespace GameOfLife
 
     template<size_t sideLength>
     void Controller<sideLength>::mainLoop()
-    {
-        sf::Shape& shape = m_view.render();
+    {   
+        m_texture.update(m_view.computeColors().get());
+
+        sf::Sprite sprite(m_texture);
 
         sf::Clock clock;
 
         sf::Font font;
         if (!font.loadFromFile(FONT_NAME))
-        {
-            // SFML already logs the error
             exit(EXIT_FAILURE);
-        }
 
         sf::Text fpsText;
         fpsText.setFont(font);
@@ -161,31 +166,30 @@ namespace GameOfLife
 
             handleKeyboardState(timeElapsed.asSeconds());
 
-            // Shapes update
-            adjustTransform(shape);
+            adjustTransform(sprite, sprite.getLocalBounds());
 
             m_window.clear();
-            m_window.draw(shape);
+            m_window.draw(sprite);
             m_window.draw(fpsText);
             m_window.display();
         }
     }
 
     template<size_t sideLength>
-    void Controller<sideLength>::adjustTransform(sf::Shape& shape)
+    void Controller<sideLength>::adjustTransform(sf::Transformable& transformable, sf::FloatRect localBounds)
     {
         sf::Vector2f newScale = sf::Vector2f(m_camera.zoom * m_windowInfos.scale.x,
-            m_camera.zoom * m_windowInfos.scale.y);
-        shape.setScale(newScale);
+                                             m_camera.zoom * m_windowInfos.scale.y);
+        transformable.setScale(newScale);
 
-        sf::Vector2f scaledBounds = sf::Vector2f(newScale.x * shape.getLocalBounds().width,
-            newScale.y * shape.getLocalBounds().height);
-        // put shape on the center of the screen
+        sf::Vector2f scaledBounds = sf::Vector2f(newScale.x * localBounds.width,
+                                                 newScale.y * localBounds.height);
+        // put entity on the center of the screen
         sf::Vector2f newPostion = (m_windowInfos.size - scaledBounds) * 0.5f;
         // take camera position into account 
         newPostion.x -= m_camera.position.x * m_windowInfos.scale.x;
         newPostion.y -= m_camera.position.y * m_windowInfos.scale.y;
-        shape.setPosition(newPostion);
+        transformable.setPosition(newPostion);
     }
 
     template<size_t sideLength>

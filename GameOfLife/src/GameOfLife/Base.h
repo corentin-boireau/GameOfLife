@@ -1,35 +1,40 @@
 #pragma once
 
-#include <array>
-#include <SFML/Graphics/Shape.hpp>
+#include "HeapArray.h"
 
 namespace GameOfLife
 {
 	template<size_t sideLength>
+	using cell_states_t = heap_array<bool, sideLength * sideLength>;
+
+	template<size_t sideLength>
+	using cell_colors_t = heap_array<uint8_t, sideLength* sideLength * 4>;
+
+	template<size_t sideLength>
 	class AbstractEngine
 	{
 	public:
-		using data_t = std::array<sf::Uint8, sideLength* sideLength * 4>;
-
-		AbstractEngine() {}
+		AbstractEngine() 
+			: m_cell_states(cell_states_t<sideLength>()) {}
+		AbstractEngine(cell_states_t<sideLength>&& initial_states) 
+			: m_cell_states(std::move(initial_states)) {}
 
 		virtual ~AbstractEngine() {}
 
-		inline bool getCellState(size_t x, size_t y) const { return m_data[x * sideLength + y]; };
-		inline void setCellState(size_t x, size_t y, bool isAlive) { m_data[x * sideLength + y] = isAlive; };
-		inline const data_t& getData() const { return m_data; };
+		inline bool getCellState(size_t x, size_t y) const            { return m_cell_states[x * sideLength + y]; }
+		inline void setCellState(size_t x, size_t y, bool isAlive)    { m_cell_states[x * sideLength + y] = isAlive; }
+		inline cell_states_t<sideLength> const& getCellStates() const { return m_cell_states; }
 		
 		virtual void computeNextGeneration() = 0;
 
 	private:
-		data_t m_data;
+		cell_states_t<sideLength> m_cell_states;
 	};
 
 	template<size_t sideLength>
 	class AbstractView
 	{
 	public:
-		using data_t = std::array<sf::Uint8, sideLength* sideLength * 4>;
 		using EngineType = AbstractEngine<sideLength>;
 
 		AbstractView(EngineType& engine)
@@ -37,12 +42,9 @@ namespace GameOfLife
 
 		virtual ~AbstractView() {}
 
-		virtual sf::Shape& render() = 0;
+		virtual cell_colors_t<sideLength> const& computeColors() const = 0;
 	protected:
-		inline const data_t& getEngineData() const
-		{
-			return m_engine.getData();
-		}
+		inline cell_states_t<sideLength> const& getCellStates() const { return m_engine.getCellStates(); }
 	private:
 		EngineType& m_engine;
 	};

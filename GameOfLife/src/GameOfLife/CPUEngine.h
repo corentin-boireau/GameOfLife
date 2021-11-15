@@ -8,6 +8,8 @@ namespace GameOfLife
 	class CPUEngine : public AbstractEngine<sideLength>
 	{
 	public:
+		using AbstractEngine<sideLength>::AbstractEngine;
+
 		void computeNextGeneration() override;
 	};
 
