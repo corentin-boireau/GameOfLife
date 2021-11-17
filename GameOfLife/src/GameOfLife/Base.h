@@ -15,20 +15,20 @@ namespace GameOfLife
 	{
 	public:
 		AbstractEngine() 
-			: m_cell_states(cell_states_t<sideLength>()) {}
+			: m_cellStates(cell_states_t<sideLength>()) {}
 		AbstractEngine(cell_states_t<sideLength>&& initial_states) 
-			: m_cell_states(std::move(initial_states)) {}
+			: m_cellStates(std::move(initial_states)) {}
 
 		virtual ~AbstractEngine() {}
 
-		inline bool getCellState(size_t x, size_t y) const            { return m_cell_states[x * sideLength + y]; }
-		inline void setCellState(size_t x, size_t y, bool isAlive)    { m_cell_states[x * sideLength + y] = isAlive; }
-		inline cell_states_t<sideLength> const& getCellStates() const { return m_cell_states; }
+		inline bool getCellState(size_t x, size_t y) const            { return m_cellStates[x * sideLength + y]; }
+		inline void setCellState(size_t x, size_t y, bool isAlive)    { m_cellStates[x * sideLength + y] = isAlive; }
+		inline cell_states_t<sideLength> const& getCellStates() const { return m_cellStates; }
 		
 		virtual void computeNextGeneration() = 0;
 
-	private:
-		cell_states_t<sideLength> m_cell_states;
+	protected:
+		cell_states_t<sideLength> m_cellStates;
 	};
 
 	template<size_t sideLength>

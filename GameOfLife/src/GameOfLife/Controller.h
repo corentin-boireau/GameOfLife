@@ -85,10 +85,6 @@ namespace GameOfLife
     template<size_t sideLength>
     void Controller<sideLength>::mainLoop()
     {   
-        m_texture.update(m_view.computeColors().get());
-
-        sf::Sprite sprite(m_texture);
-
         sf::Clock clock;
 
         sf::Font font;
@@ -165,6 +161,10 @@ namespace GameOfLife
             }
 
             handleKeyboardState(timeElapsed.asSeconds());
+
+            m_engine.computeNextGeneration();
+            m_texture.update(m_view.computeColors().get());
+            sf::Sprite sprite(m_texture);
 
             adjustTransform(sprite, sprite.getLocalBounds());
 

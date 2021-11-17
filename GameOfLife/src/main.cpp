@@ -21,7 +21,7 @@
 
 #define MOVE_AMOUNT_PER_SEC 500.f
 
-#define SIDE_LENGTH 201
+#define SIDE_LENGTH 500
 
 int main()
 {
