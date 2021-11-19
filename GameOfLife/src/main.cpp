@@ -15,8 +15,6 @@
 
 #define TITLE "Game of Life"
 
-#define ZOOM_MIN 0.01f
-#define ZOOM_MAX 100.f
 #define ZOOM_FACTOR_PER_SCROLL_TICK 0.25f
 
 #define MOVE_AMOUNT_PER_SEC 500.f
@@ -29,7 +27,7 @@ int main()
     
     GameOfLife::cell_states_t<SIDE_LENGTH> cell_states;
     for (size_t i = 0; i < cell_states.size(); i++)
-        cell_states[i] = (i % 2) == 0 ? true : false;
+        cell_states[i] = i > cell_states.size() * 2 / 3 ? true : false;
     
     GameOfLife::CPUEngine   <SIDE_LENGTH> engine(std::move(cell_states));
     GameOfLife::ClassicView <SIDE_LENGTH> view(engine);

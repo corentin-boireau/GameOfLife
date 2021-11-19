@@ -25,8 +25,8 @@ namespace GameOfLife
 		for (size_t i = 0; i < states.size(); i++)
 		{
 			const size_t index = 4 * i;
-			const uint8_t color = states[i] * 255;
-			m_cell_colors[index + 0] = color;
+			const uint8_t color = states[i] * 200;
+			m_cell_colors[index + 0] =    10;
 			m_cell_colors[index + 1] = color;
 			m_cell_colors[index + 2] = color;
 			m_cell_colors[index + 3] =   255;

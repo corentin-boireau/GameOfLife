@@ -12,7 +12,7 @@
 #include "Base.h"
 #include "Macros.h"
 
-#define ZOOM_MIN 0.01f
+#define ZOOM_MIN 0.1f
 #define ZOOM_MAX 100.f
 
 template<typename T>
@@ -58,7 +58,8 @@ namespace GameOfLife
 			: m_engine(engine), m_view(view), m_window(window), 
 			  m_windowInfos(static_cast<sf::Vector2f>(window.getSize()),
 				                        sf::Vector2f(1.f, 1.f)),
-			  m_camera(Camera(moveAmountPerSec, zoomFactorPerScrollTick)) 
+			  m_camera(Camera(moveAmountPerSec, zoomFactorPerScrollTick)),
+              m_autoRun(false)
         {
             bool created = m_texture.create(static_cast<uint32_t>(sideLength), static_cast<uint32_t>(sideLength));
             assert(created);
@@ -73,6 +74,7 @@ namespace GameOfLife
 		Camera            m_camera;
 		WindowInfos       m_windowInfos;
         sf::Texture       m_texture;
+        bool              m_autoRun;
 
 
         void         adjustTransform(sf::Transformable& transformable, sf::FloatRect localBounds);
@@ -80,7 +82,7 @@ namespace GameOfLife
 		sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow);
 	};
 
-    constexpr const char* FONT_NAME = "assets/arial.ttf";
+    const char* FONT_NAME = "assets/arial.ttf";
 
     template<size_t sideLength>
     void Controller<sideLength>::mainLoop()
@@ -157,13 +159,34 @@ namespace GameOfLife
                         m_windowInfos.scale.y = m_windowInfos.size.y / static_cast<float>(event.size.height);
                         break;
                     }
+                    case sf::Event::KeyReleased:
+                    {
+                        switch (event.key.code)
+                        {
+                            case sf::Keyboard::N:
+                            {
+                                m_engine.computeNextGeneration();
+                                break;
+                            }
+                            case sf::Keyboard::Space:
+                            {
+                                m_autoRun = ! m_autoRun;
+                                GOL_LOG(m_autoRun);
+                                break;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
 
             handleKeyboardState(timeElapsed.asSeconds());
 
-            m_engine.computeNextGeneration();
+            if (m_autoRun)
+                m_engine.computeNextGeneration();
+
             m_texture.update(m_view.computeColors().get());
+
             sf::Sprite sprite(m_texture);
 
             adjustTransform(sprite, sprite.getLocalBounds());

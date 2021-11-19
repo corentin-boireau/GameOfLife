@@ -4,11 +4,14 @@
 
 namespace GameOfLife
 {
-	template<size_t sideLength>
-	using cell_states_t = heap_array<bool, sideLength * sideLength>;
+	template<size_t sideLength>		
+	constexpr size_t gridLength = sideLength * sideLength;
 
 	template<size_t sideLength>
-	using cell_colors_t = heap_array<uint8_t, sideLength* sideLength * 4>;
+	using cell_states_t = heap_array<bool, gridLength<sideLength>>;
+
+	template<size_t sideLength>
+	using cell_colors_t = heap_array<uint8_t, gridLength<sideLength> * 4>;
 
 	template<size_t sideLength>
 	class AbstractEngine
