@@ -19,7 +19,7 @@
 
 #define MOVE_AMOUNT_PER_SEC 500.f
 
-#define SIDE_LENGTH 500
+#define SIDE_LENGTH 1000
 
 int main()
 {
@@ -27,7 +27,7 @@ int main()
     
     GameOfLife::cell_states_t<SIDE_LENGTH> cell_states;
     for (size_t i = 0; i < cell_states.size(); i++)
-        cell_states[i] = i > cell_states.size() * 2 / 3 ? true : false;
+        cell_states[i] = i > cell_states.size() * 2 / 5 ? true : false;
     
     GameOfLife::CPUEngine   <SIDE_LENGTH> engine(std::move(cell_states));
     GameOfLife::ClassicView <SIDE_LENGTH> view(engine);

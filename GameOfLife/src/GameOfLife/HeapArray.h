@@ -12,7 +12,8 @@ public:
 	inline size_t size() const                   { return N; }
 	inline T& operator[](size_t pos)             { return m_data[pos]; }
 	inline T const& operator[](size_t pos) const { return m_data[pos]; }
-	inline T* get()      const                   { return m_data.get(); }
+	inline T* get() const                        { return m_data.get(); }
+	inline void fill(T const& elem)              { std::fill(m_data.get(), m_data.get() + N, elem); }
 private:
 	std::unique_ptr<T[]> m_data;
 };

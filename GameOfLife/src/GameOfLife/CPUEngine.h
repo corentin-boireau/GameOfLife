@@ -19,6 +19,7 @@ namespace GameOfLife
 			  m_nextCellStates(cell_states_t<sideLength>()) {}
 
 		void computeNextGeneration() override;
+		void clearCells() override;
 	private:
 		cell_states_t<sideLength> m_nextCellStates;
 	};
@@ -140,14 +141,14 @@ namespace GameOfLife
 		// Builds the next states on m_nextCellStates
 		for (size_t curIndex = 0; curIndex < m_cellStates.size(); curIndex++)
 		{
-			size_t topLeft   = topLeftNeighborIndex  <sideLength>(curIndex); // assert(topLeft   < m_cellStates.size());
-			size_t topCenter = topCenterNeighborIndex<sideLength>(curIndex); // assert(topCenter < m_cellStates.size());
-			size_t topRight  = topRightNeighborIndex <sideLength>(curIndex); // assert(topRight  < m_cellStates.size());
-			size_t midLeft   = midLeftNeighborIndex  <sideLength>(curIndex); // assert(midLeft   < m_cellStates.size());
-			size_t midRight  = midRightNeighborIndex <sideLength>(curIndex); // assert(midRight  < m_cellStates.size());
-			size_t botLeft   = botLeftNeighborIndex  <sideLength>(curIndex); // assert(botLeft   < m_cellStates.size());
-			size_t botCenter = botCenterNeighborIndex<sideLength>(curIndex); // assert(botCenter < m_cellStates.size());
-			size_t botRight  = botRightNeighborIndex <sideLength>(curIndex); // assert(botRight  < m_cellStates.size());
+			size_t topLeft   = topLeftNeighborIndex  <sideLength>(curIndex);
+			size_t topCenter = topCenterNeighborIndex<sideLength>(curIndex);
+			size_t topRight  = topRightNeighborIndex <sideLength>(curIndex);
+			size_t midLeft   = midLeftNeighborIndex  <sideLength>(curIndex);
+			size_t midRight  = midRightNeighborIndex <sideLength>(curIndex);
+			size_t botLeft   = botLeftNeighborIndex  <sideLength>(curIndex);
+			size_t botCenter = botCenterNeighborIndex<sideLength>(curIndex);
+			size_t botRight  = botRightNeighborIndex <sideLength>(curIndex);
 
 			int nbNeighbors = m_cellStates[topLeft] + m_cellStates[topCenter] + m_cellStates[topRight]
 				            + m_cellStates[midLeft]                           + m_cellStates[midRight]
@@ -164,6 +165,12 @@ namespace GameOfLife
 
 		// Makes the new generation the current generation
 		std::swap(m_cellStates, m_nextCellStates);
+	}
+
+	template<size_t sideLength>
+	inline void CPUEngine<sideLength>::clearCells()
+	{
+		m_cellStates.fill(false);
 	}
 
 }

@@ -79,7 +79,8 @@ namespace GameOfLife
 
         void         adjustTransform(sf::Transformable& transformable, sf::FloatRect localBounds);
 		void         handleKeyboardState(float timeElapsed);
-		sf::Vector2f computePointCoordinates(sf::Vector2f pointOnWindow);
+        sf::Vector2f computeWorldCoordinates(sf::Vector2f pointOnWindow);
+        sf::Vector2i worldToCellCoordinates(sf::Vector2f pointInWorld);
 	};
 
     const char* FONT_NAME = "assets/arial.ttf";
@@ -143,14 +144,45 @@ namespace GameOfLife
                     }
                     case sf::Event::MouseButtonPressed:
                     {
-                        const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseButton.x),
-                                                                        static_cast<float>(event.mouseButton.y));
-                        GOL_LOG("point on window : " << pointOnWindow);
+                        if (event.mouseButton.button == sf::Mouse::Button::Left 
+                         || event.mouseButton.button == sf::Mouse::Button::Right)
+                        {
+                            const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseButton.x),
+                                                                            static_cast<float>(event.mouseButton.y));
+                            GOL_LOG("point on window : " << pointOnWindow);
+                            const sf::Vector2f curWinSize = static_cast<sf::Vector2f>(m_window.getSize());
+                            const sf::Vector2f pointInCoordSystem = computeWorldCoordinates(pointOnWindow);
+                            GOL_LOG("point in coordinate system : " << pointInCoordSystem);
+                            const sf::Vector2i cellCoords = worldToCellCoordinates(pointInCoordSystem);
+                            GOL_LOG("cell coordinates : " << cellCoords);
+                            
+                            if (cellCoords.x >= 0 && cellCoords.x < sideLength
+                             && cellCoords.y >= 0 && cellCoords.y < sideLength)
+                            {
+                                m_engine.setCellState(cellCoords.x, cellCoords.y, event.mouseButton.button == sf::Mouse::Button::Left);
+                            }
+                        }
+                        break;
+                    }
+                    case sf::Event::MouseMoved:
+                    {
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
+                         || sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        {
+                            const sf::Vector2f pointOnWindow = sf::Vector2f(static_cast<float>(event.mouseMove.x),
+                                                                            static_cast<float>(event.mouseMove.y));
+                            GOL_LOG("point on window : " << pointOnWindow);
 
-                        const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(m_window.getSize().x),
-                                                                     static_cast<float>(m_window.getSize().y));
-                        const sf::Vector2f pointInCoordSystem = computePointCoordinates(pointOnWindow);
-                        GOL_LOG("point in coordinate system : " << pointInCoordSystem);
+                            const sf::Vector2f curWinSize = static_cast<sf::Vector2f>(m_window.getSize());
+                            const sf::Vector2f pointInCoordSystem = computeWorldCoordinates(pointOnWindow);
+                            GOL_LOG("point in coordinate system : " << pointInCoordSystem);
+                            const sf::Vector2i cellCoords = worldToCellCoordinates(pointInCoordSystem);
+                            GOL_LOG("cell coordinates : " << cellCoords);
+                            
+                            if (cellCoords.x >= 0 && cellCoords.x < sideLength
+                             && cellCoords.y >= 0 && cellCoords.y < sideLength)
+                                m_engine.setCellState(cellCoords.x, cellCoords.y, sf::Mouse::isButtonPressed(sf::Mouse::Left));
+                        }
                         break;
                     }
                     case sf::Event::Resized:
@@ -172,6 +204,11 @@ namespace GameOfLife
                             {
                                 m_autoRun = ! m_autoRun;
                                 GOL_LOG(m_autoRun);
+                                break;
+                            }
+                            case sf::Keyboard::C:
+                            {
+                                m_engine.clearCells();
                                 break;
                             }
                         }
@@ -230,11 +267,18 @@ namespace GameOfLife
     }
 
     template<size_t sideLength>
-    sf::Vector2f Controller<sideLength>::computePointCoordinates(sf::Vector2f pointOnWindow)
+    sf::Vector2f Controller<sideLength>::computeWorldCoordinates(sf::Vector2f pointOnWindow)
     {
-        const sf::Vector2f curWinSize = sf::Vector2f(static_cast<float>(m_window.getSize().x),
-            static_cast<float>(m_window.getSize().y));
+        const sf::Vector2f curWinSize = sf::Vector2f(static_cast<sf::Vector2f>(m_window.getSize()));
         const sf::Vector2f distanceFromWindowCenter = curWinSize * 0.5f - pointOnWindow;
         return -(distanceFromWindowCenter - m_camera.position) / m_camera.zoom;
+    }
+    template<size_t sideLength>
+    inline sf::Vector2i Controller<sideLength>::worldToCellCoordinates(sf::Vector2f pointInWorld)
+    {
+        constexpr const float halfSideLength = (float)sideLength / 2;
+
+        return { (int)(pointInWorld.x + halfSideLength), 
+                 (int)(pointInWorld.y + halfSideLength) };
     }
 }
