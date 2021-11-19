@@ -195,22 +195,9 @@ namespace GameOfLife
                     {
                         switch (event.key.code)
                         {
-                            case sf::Keyboard::N:
-                            {
-                                m_engine.computeNextGeneration();
-                                break;
-                            }
-                            case sf::Keyboard::Space:
-                            {
-                                m_autoRun = ! m_autoRun;
-                                GOL_LOG(m_autoRun);
-                                break;
-                            }
-                            case sf::Keyboard::C:
-                            {
-                                m_engine.clearCells();
-                                break;
-                            }
+                            case sf::Keyboard::Space:  m_autoRun = !m_autoRun;            GOL_LOG(m_autoRun);  break;
+                            case sf::Keyboard::N:      m_engine.computeNextGeneration();                       break;
+                            case sf::Keyboard::C:      m_engine.clearCells();                                  break;
                         }
                         break;
                     }

@@ -101,7 +101,7 @@ namespace GameOfLife
 		if (index % lineSize == 0)
 			botLeft += lineSize;
 		if (botLeft >= gridSize)
-			botLeft -= lineSize;
+			botLeft -= gridSize;
 
 		return (size_t)botLeft;
 	}
@@ -114,7 +114,7 @@ namespace GameOfLife
 
 		int64_t botCenter = (int64_t)index + lineSize;
 		if (botCenter >= gridSize)
-			botCenter -= lineSize;
+			botCenter -= gridSize;
 
 		return (size_t)botCenter;
 	}
@@ -129,7 +129,7 @@ namespace GameOfLife
 		if (botRight % lineSize == 0)
 			botRight -= lineSize;
 		if (botRight >= gridSize)
-			botRight -= lineSize;
+			botRight -= gridSize;
 
 		return (size_t)botRight;
 	}
