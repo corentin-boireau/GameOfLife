@@ -79,7 +79,7 @@ namespace GameOfLife
 
         void         adjustTransform(sf::Transformable& transformable, sf::FloatRect localBounds);
 		void         handleKeyboardState(float timeElapsed);
-        sf::Vector2f computeWorldCoordinates(sf::Vector2f pointOnWindow);
+        sf::Vector2f windowToWorldCoordinates(sf::Vector2f pointOnWindow);
         sf::Vector2i worldToCellCoordinates(sf::Vector2f pointInWorld);
 	};
 
@@ -151,7 +151,7 @@ namespace GameOfLife
                                                                             static_cast<float>(event.mouseButton.y));
                             GOL_LOG("point on window : " << pointOnWindow);
                             const sf::Vector2f curWinSize = static_cast<sf::Vector2f>(m_window.getSize());
-                            const sf::Vector2f pointInCoordSystem = computeWorldCoordinates(pointOnWindow);
+                            const sf::Vector2f pointInCoordSystem = windowToWorldCoordinates(pointOnWindow);
                             GOL_LOG("point in coordinate system : " << pointInCoordSystem);
                             const sf::Vector2i cellCoords = worldToCellCoordinates(pointInCoordSystem);
                             GOL_LOG("cell coordinates : " << cellCoords);
@@ -174,7 +174,7 @@ namespace GameOfLife
                             GOL_LOG("point on window : " << pointOnWindow);
 
                             const sf::Vector2f curWinSize = static_cast<sf::Vector2f>(m_window.getSize());
-                            const sf::Vector2f pointInCoordSystem = computeWorldCoordinates(pointOnWindow);
+                            const sf::Vector2f pointInCoordSystem = windowToWorldCoordinates(pointOnWindow);
                             GOL_LOG("point in coordinate system : " << pointInCoordSystem);
                             const sf::Vector2i cellCoords = worldToCellCoordinates(pointInCoordSystem);
                             GOL_LOG("cell coordinates : " << cellCoords);
@@ -204,7 +204,8 @@ namespace GameOfLife
                 }
             }
 
-            handleKeyboardState(timeElapsed.asSeconds());
+            if(m_window.hasFocus())
+                handleKeyboardState(timeElapsed.asSeconds());
 
             if (m_autoRun)
                 m_engine.computeNextGeneration();
@@ -254,7 +255,7 @@ namespace GameOfLife
     }
 
     template<size_t sideLength>
-    sf::Vector2f Controller<sideLength>::computeWorldCoordinates(sf::Vector2f pointOnWindow)
+    sf::Vector2f Controller<sideLength>::windowToWorldCoordinates(sf::Vector2f pointOnWindow)
     {
         const sf::Vector2f curWinSize = sf::Vector2f(static_cast<sf::Vector2f>(m_window.getSize()));
         const sf::Vector2f distanceFromWindowCenter = curWinSize * 0.5f - pointOnWindow;
