@@ -13,8 +13,32 @@ namespace GameOfLife
 	template<size_t sideLength>
 	using cell_colors_t = heap_array<uint8_t, gridLength<sideLength> * 4>;
 
+	// INTERFACES
+
 	template<size_t sideLength>
-	class AbstractEngine
+	class IEngine
+	{
+	public:
+		virtual ~IEngine() {}
+
+		virtual void setCellState(size_t x, size_t y, bool isAlive) = 0;
+		virtual void computeNextGeneration() = 0;
+		virtual void clearCells() = 0;
+	};
+
+	template<size_t sideLength>
+	class IView
+	{
+	public:
+		virtual ~IView() {}
+
+		virtual cell_colors_t<sideLength> const& computeColors() const = 0;
+	};
+
+
+	// CPU Abstract classes (will be removed)
+	template<size_t sideLength>
+	class AbstractEngine : public IEngine<sideLength>
 	{
 	public:
 		AbstractEngine() 
@@ -24,19 +48,16 @@ namespace GameOfLife
 
 		virtual ~AbstractEngine() {}
 
-		inline bool getCellState(size_t x, size_t y) const            { return m_cellStates[x + y * sideLength]; }
-		inline void setCellState(size_t x, size_t y, bool isAlive)    { m_cellStates[x + y * sideLength] = isAlive; }
-		inline cell_states_t<sideLength> const& getCellStates() const { return m_cellStates; }
-		
-		virtual void computeNextGeneration() = 0;
-		virtual void clearCells() = 0;
+		void setCellState(size_t x, size_t y, bool isAlive) override { m_cellStates[x + y * sideLength] = isAlive; }
+		// inline bool getCellState(size_t x, size_t y) const           { return m_cellStates[x + y * sideLength]; }
+		cell_states_t<sideLength> const& getCellStates() const       { return m_cellStates; }
 
 	protected:
 		cell_states_t<sideLength> m_cellStates;
 	};
 
 	template<size_t sideLength>
-	class AbstractView
+	class AbstractView : public IView<sideLength>
 	{
 	public:
 		using EngineType = AbstractEngine<sideLength>;
@@ -46,7 +67,6 @@ namespace GameOfLife
 
 		virtual ~AbstractView() {}
 
-		virtual cell_colors_t<sideLength> const& computeColors() const = 0;
 	protected:
 		inline cell_states_t<sideLength> const& getCellStates() const { return m_engine.getCellStates(); }
 	private:

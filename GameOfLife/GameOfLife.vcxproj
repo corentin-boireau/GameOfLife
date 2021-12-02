@@ -14,10 +14,9 @@
     <CudaCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\GameOfLife\ClassicView.h" />
-    <ClInclude Include="src\GameOfLife\CPUEngine.h" />
     <ClInclude Include="src\GameOfLife\Base.h" />
     <ClInclude Include="src\GameOfLife\Controller.h" />
+    <ClInclude Include="src\GameOfLife\CPUImplentation.h" />
     <ClInclude Include="src\GameOfLife\HeapArray.h" />
     <ClInclude Include="src\GameOfLife\Macros.h" />
   </ItemGroup>

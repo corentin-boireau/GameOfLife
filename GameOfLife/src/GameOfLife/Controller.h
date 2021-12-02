@@ -50,8 +50,8 @@ namespace GameOfLife
 	class Controller
 	{
 	public:
-		using EngineType = AbstractEngine<sideLength>;
-		using ViewType = AbstractView<sideLength>;
+		using EngineType = IEngine<sideLength>;
+		using ViewType = IView<sideLength>;
 
 		Controller(EngineType& engine, ViewType& view, sf::RenderWindow& window,
 			       float moveAmountPerSec, float zoomFactorPerScrollTick)
@@ -195,9 +195,9 @@ namespace GameOfLife
                     {
                         switch (event.key.code)
                         {
-                            case sf::Keyboard::Space:  m_autoRun = !m_autoRun;            GOL_LOG(m_autoRun);  break;
-                            case sf::Keyboard::N:      m_engine.computeNextGeneration();                       break;
-                            case sf::Keyboard::C:      m_engine.clearCells();                                  break;
+                            case sf::Keyboard::Space:  m_autoRun = !m_autoRun;            break;
+                            case sf::Keyboard::N:      m_engine.computeNextGeneration();  break;
+                            case sf::Keyboard::C:      m_engine.clearCells();             break;
                         }
                         break;
                     }
@@ -264,7 +264,7 @@ namespace GameOfLife
     template<size_t sideLength>
     inline sf::Vector2i Controller<sideLength>::worldToCellCoordinates(sf::Vector2f pointInWorld)
     {
-        constexpr const float halfSideLength = (float)sideLength / 2;
+        constexpr const float halfSideLength = (float)sideLength / 2.f;
 
         return { (int)(pointInWorld.x + halfSideLength), 
                  (int)(pointInWorld.y + halfSideLength) };

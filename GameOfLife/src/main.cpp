@@ -9,8 +9,7 @@
 #include "GameOfLife/Base.h"
 #include "GameOfLife/Macros.h"
 #include "GameOfLife/Controller.h"
-#include "GameOfLife/ClassicView.h"
-#include "GameOfLife/CPUEngine.h"
+#include "GameOfLife/CPUImplentation.h"
 #include "GameOfLife/HeapArray.h"
 
 #define TITLE "Game of Life"
@@ -30,7 +29,7 @@ int main()
         cell_states[i] = i > cell_states.size() * 2 / 5 ? true : false;
     
     GameOfLife::CPUEngine   <SIDE_LENGTH> engine(std::move(cell_states));
-    GameOfLife::ClassicView <SIDE_LENGTH> view(engine);
+    GameOfLife::CPUView     <SIDE_LENGTH> view(engine);
     GameOfLife::Controller  <SIDE_LENGTH> controller(engine, view, window, MOVE_AMOUNT_PER_SEC, ZOOM_FACTOR_PER_SCROLL_TICK);
     
     controller.mainLoop();
