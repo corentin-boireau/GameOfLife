@@ -10,20 +10,24 @@ namespace GameOfLife
 
     // --------------------- CPU ENGINE -----------------------//
     template<size_t sideLength>
-    class CPUEngine : public AbstractEngine<sideLength>
+    class CPUEngine : public IEngine<sideLength>
     {
     public:
         CPUEngine()
-            : AbstractEngine<sideLength>(),
+            : m_cellStates(cell_states_t<sideLength>()),
             m_nextCellStates(cell_states_t<sideLength>()) {}
         CPUEngine(cell_states_t<sideLength>&& initial_states)
-            : AbstractEngine<sideLength>(std::move(initial_states)),
+            : m_cellStates(std::move(initial_states)),
             m_nextCellStates(cell_states_t<sideLength>()) {}
 
-        void computeNextGeneration() override;
+        inline cell_states_t<sideLength> const& getCellStates() const { return m_cellStates; }
+
+        void setCellState(size_t x, size_t y, bool isAlive) override { m_cellStates[x + y * sideLength] = isAlive; }
         void clearCells() override { m_cellStates.fill(false); }
-    
+        void computeNextGeneration() override;
+
     private:
+        cell_states_t<sideLength> m_cellStates;
         cell_states_t<sideLength> m_nextCellStates;
 
         inline bool topLeftNeighborIndex(size_t index)
@@ -164,17 +168,22 @@ namespace GameOfLife
 
     // ---------------------- CPU VIEW -------------------------//
     template<size_t sideLength>
-    class CPUView : public AbstractView<sideLength>
+    class CPUView : public IView<sideLength>
     {
     public:
+        using EngineType = CPUEngine<sideLength>;
+
         CPUView(EngineType& engine)
-            : AbstractView<sideLength>(engine),
+            : m_engine(engine),
             m_cell_colors(cell_colors_t<sideLength>()) {}
 
         cell_colors_t<sideLength> const& computeColors() const override;
 
     private:
+        EngineType& m_engine;
         mutable cell_colors_t<sideLength> m_cell_colors;
+
+        inline cell_states_t<sideLength> const& getCellStates() const { return m_engine.getCellStates(); }
     };
 
     template<size_t sideLength>
