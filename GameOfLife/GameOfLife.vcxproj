@@ -17,6 +17,7 @@
     <ClInclude Include="src\GameOfLife\Base.h" />
     <ClInclude Include="src\GameOfLife\Controller.h" />
     <ClInclude Include="src\GameOfLife\CPUImplentation.h" />
+    <ClInclude Include="src\GameOfLife\GPUImplementation.cuh" />
     <ClInclude Include="src\GameOfLife\HeapArray.h" />
     <ClInclude Include="src\GameOfLife\Macros.h" />
   </ItemGroup>

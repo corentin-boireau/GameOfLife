@@ -175,13 +175,13 @@ namespace GameOfLife
 
         CPUView(EngineType& engine)
             : m_engine(engine),
-            m_cell_colors(cell_colors_t<sideLength>()) {}
+            m_cellColors(cell_colors_t<sideLength>()) {}
 
         cell_colors_t<sideLength> const& computeColors() const override;
 
     private:
         EngineType& m_engine;
-        mutable cell_colors_t<sideLength> m_cell_colors;
+        mutable cell_colors_t<sideLength> m_cellColors;
 
         inline cell_states_t<sideLength> const& getCellStates() const { return m_engine.getCellStates(); }
     };
@@ -194,11 +194,11 @@ namespace GameOfLife
         {
             const size_t index = 4 * i;
             const uint8_t color = states[i] * 200;
-            m_cell_colors[index + 0] = 10;
-            m_cell_colors[index + 1] = color;
-            m_cell_colors[index + 2] = color;
-            m_cell_colors[index + 3] = 255;
+            m_cellColors[index + 0] = 10;
+            m_cellColors[index + 1] = color;
+            m_cellColors[index + 2] = color;
+            m_cellColors[index + 3] = 255;
         }
-        return m_cell_colors;
+        return m_cellColors;
     }
 }
