@@ -43,12 +43,147 @@ namespace GameOfLife
         dev_cell_states_t m_devNextCellStates;
     };
 
+    template<size_t sideLength> __device__
+    bool topLeftNeighborIndex(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t topLeft = (int64_t)index - lineSize - 1;
+        if (index % lineSize == 0)
+            topLeft += lineSize;
+        if (topLeft < 0)
+            topLeft += gridSize;
+
+        return devCellStates[topLeft];
+    }
+    template<size_t sideLength> __device__
+    inline bool topCenterNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t topCenter = (int64_t)index - lineSize;
+        if (topCenter < 0)
+            topCenter += gridSize;
+        return devCellStates[topCenter];
+    }
+    template<size_t sideLength> __device__
+    inline bool topRightNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t topRight = (int64_t)index - lineSize + 1;
+
+        if (topRight % lineSize == 0)
+            topRight -= lineSize;
+        if (topRight < 0)
+            topRight += gridSize;
+
+        return devCellStates[topRight];
+    }
+    template<size_t sideLength> __device__
+    inline bool midLeftNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+
+        int64_t midLeft = (int64_t)index - 1;
+        if (index % lineSize == 0)
+            midLeft += lineSize;
+        return devCellStates[midLeft];
+    }
+    template<size_t sideLength> __device__
+    inline bool midRightNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+
+        int64_t midRight = (int64_t)index + 1;
+        if (midRight % lineSize == 0)
+            midRight -= lineSize;
+        return devCellStates[midRight];
+    }
+    template<size_t sideLength> __device__
+    inline bool botLeftNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t botLeft = (int64_t)index + lineSize - 1;
+        if (index % lineSize == 0)
+            botLeft += lineSize;
+        if (botLeft >= gridSize)
+            botLeft -= gridSize;
+
+        return devCellStates[botLeft];
+    }
+    template<size_t sideLength> __device__
+    inline bool botCenterNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t botCenter = (int64_t)index + lineSize;
+        if (botCenter >= gridSize)
+            botCenter -= gridSize;
+
+        return devCellStates[botCenter];
+    }
+    template<size_t sideLength> __device__
+    inline bool botRightNeighborState(size_t index, dev_cell_states_t devCellStates)
+    {
+        constexpr const int64_t lineSize = (int64_t)sideLength;
+        constexpr const int64_t gridSize = (int64_t)gridLength<sideLength>;
+
+        int64_t botRight = (int64_t)index + lineSize + 1;
+        if (botRight % lineSize == 0)
+            botRight -= lineSize;
+        if (botRight >= gridSize)
+            botRight -= gridSize;
+
+        return devCellStates[botRight];
+    }
+
+    template<size_t sideLength> __global__
+    void computeNextGenerationOnGPU(dev_cell_states_t devCellStates, dev_cell_states_t devNextCellStates)
+    {
+        size_t curIndex = ((size_t)blockDim.x * blockIdx.x + threadIdx.x);
+        if (curIndex < gridLength<sideLength>)
+        {
+            bool topLeft   = topLeftNeighborIndex   <sideLength> (curIndex, devCellStates);
+            bool topCenter = topCenterNeighborState <sideLength> (curIndex, devCellStates);
+            bool topRight  = topRightNeighborState  <sideLength> (curIndex, devCellStates);
+            bool midLeft   = midLeftNeighborState   <sideLength> (curIndex, devCellStates);
+            bool midRight  = midRightNeighborState  <sideLength> (curIndex, devCellStates);
+            bool botLeft   = botLeftNeighborState   <sideLength> (curIndex, devCellStates);
+            bool botCenter = botCenterNeighborState <sideLength> (curIndex, devCellStates);
+            bool botRight  = botRightNeighborState  <sideLength> (curIndex, devCellStates);
+
+            int nbNeighbors = topLeft + topCenter + topRight
+                            + midLeft             + midRight
+                            + botLeft + botCenter + botRight;
+
+            switch (nbNeighbors)
+            {
+                case 2:  devNextCellStates[curIndex] = devCellStates[curIndex]; break;
+                case 3:  devNextCellStates[curIndex] = true;                    break;
+                default: devNextCellStates[curIndex] = false;                   break;
+            }
+        }
+    }
+
     template<size_t sideLength>
     void GPUEngine<sideLength>::computeNextGeneration()
     {
+        constexpr int threadsPerBlock = 256;
+        constexpr int blocksPerGrid = (gridLength<sideLength> + threadsPerBlock - 1) / threadsPerBlock;
+
         // Builds the next states on m_nextCellStates
+        computeNextGenerationOnGPU<sideLength> <<<blocksPerGrid, threadsPerBlock>>>
+            (m_devCellStates, m_devNextCellStates);
 
         // Makes the new generation the current generation
+        std::swap(m_devCellStates, m_devNextCellStates);
     }
 
 
@@ -81,24 +216,25 @@ namespace GameOfLife
     __global__
     void computeColorsOnGPU(dev_cell_colors_t devCellColors, dev_cell_states_t devCellStates, size_t gridSize)
     {
-        size_t i = ((size_t)blockDim.x * blockIdx.x + threadIdx.x) * 4;
-        if (i < gridSize)
+        size_t stateIndex = ((size_t)blockDim.x * blockIdx.x + threadIdx.x);
+        if (stateIndex < gridSize)
         {
-            const uint8_t color = devCellStates[i] * 200;
-            devCellColors[i + 0] = 10;
-            devCellColors[i + 1] = color;
-            devCellColors[i + 2] = color;
-            devCellColors[i + 3] = 255;
+            size_t colorIndex = stateIndex * 4;
+            const uint8_t color = devCellStates[stateIndex] * 200;
+            devCellColors[colorIndex + 0] = 10;
+            devCellColors[colorIndex + 1] = color;
+            devCellColors[colorIndex + 2] = color;
+            devCellColors[colorIndex + 3] = 255;
         }
     }
 
     template<size_t sideLength>
     cell_colors_t<sideLength> const& GPUView<sideLength>::computeColors() const
     {
-        int threadsPerBlock = 256;
-        int blocksPerGrid = (gridLength<sideLength> + threadsPerBlock - 1) / threadsPerBlock;
-        computeColorsOnGPU<<<blocksPerGrid, threadsPerBlock>>>(m_devCellColors, 
-            getDeviceCellStates(), gridLength<sideLength> * 4);
+        constexpr int threadsPerBlock = 256;
+        constexpr int blocksPerGrid = (gridLength<sideLength> + threadsPerBlock - 1) / threadsPerBlock;
+        computeColorsOnGPU<<<blocksPerGrid, threadsPerBlock>>>
+            (m_devCellColors, getDeviceCellStates(), gridLength<sideLength> * 4);
 
         CUDA_ASSERT(cudaMemcpy(m_cellColors.get(), m_devCellColors, gridLength<sideLength> * 4 * sizeof(uint8_t), cudaMemcpyDeviceToHost));
         return m_cellColors;
