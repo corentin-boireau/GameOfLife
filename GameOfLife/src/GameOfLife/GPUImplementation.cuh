@@ -195,8 +195,8 @@ namespace GameOfLife
     public:
         using EngineType = GPUEngine<sideLength>;
 
-        GPUView(EngineType& engine)
-            : m_engine(engine),
+        GPUView(EngineType& engine) : 
+            m_engine(engine),
             m_cellColors(cell_colors_t<sideLength>()) 
         {
             CUDA_ASSERT(cudaMalloc((void**)&m_devCellColors, gridLength<sideLength> * 4 * sizeof(uint8_t)));
@@ -216,7 +216,7 @@ namespace GameOfLife
     __global__
     void computeColorsOnGPU(dev_cell_colors_t devCellColors, dev_cell_states_t devCellStates, size_t gridSize)
     {
-        size_t stateIndex = ((size_t)blockDim.x * blockIdx.x + threadIdx.x);
+        size_t stateIndex = (static_cast<size_t>(blockDim.x) * blockIdx.x + threadIdx.x);
         if (stateIndex < gridSize)
         {
             size_t colorIndex = stateIndex * 4;
