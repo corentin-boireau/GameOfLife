@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.20.0)
 
 project("Game of Life"
     VERSION 1.0
-    LANGUAGES CXX CUDA
+    LANGUAGES CXX
 )
+
+option(GPU_BUILD "Build GPU version" ON)
 
 # Static linking by default
 if(NOT DEFINED BUILD_SHARED_LIBS)
